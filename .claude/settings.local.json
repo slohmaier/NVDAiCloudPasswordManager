@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(Select-Object -First 20)",
+      "Bash(powershell.exe -Command \"Get-ChildItem -Path ''C:\\\\Users\\\\slohma\\\\repos\\\\private'' -Name | Select-Object -First 20\")",
+      "Bash(git -C \"C:\\\\Users\\\\slohma\\\\repos\\\\private\\\\NVDAiCloudPasswordManager\" status)",
+      "Bash(git -C \"C:\\\\Users\\\\slohma\\\\repos\\\\private\\\\NVDAiCloudPasswordManager\" log --oneline -5)",
+      "Bash(git -C \"C:\\\\Users\\\\slohma\\\\repos\\\\private\\\\NVDAiCloudPasswordManager\" config user.email \"stefan@slohmaier.de\")",
+      "Bash(git -C \"C:\\\\Users\\\\slohma\\\\repos\\\\private\\\\NVDAiCloudPasswordManager\" add CLAUDE.md .claude/)",
+      "Bash(git -C \"C:\\\\Users\\\\slohma\\\\repos\\\\private\\\\NVDAiCloudPasswordManager\" commit -m \"$\\(cat <<''EOF''\nAdd CLAUDE.md for Claude Code guidance\n\n🤖 Generated with [Claude Code]\\(https://claude.ai/code\\)\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n\\)\")"
+    ]
+  }
+}
