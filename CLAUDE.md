@@ -4,7 +4,13 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-NVDA add-on that makes iCloud Password Manager popups accessible. When an iCloud verification code dialog appears, the add-on detects it and can read the 6-digit code. For password save dialogs, it focuses the first button.
+NVDA add-on that makes iCloud Password Manager popups accessible for screen reader users.
+
+### Current Features (v1.0)
+
+1. **Verification Code Announcements**: Automatically detects iCloud verification code dialogs and announces the 6-digit code with spaces for clarity. Includes hint for NVDA+Tab to repeat.
+
+2. **Password Save Dialog Support**: For dialogs without verification codes, focuses the dialog and first button for easy interaction.
 
 ## Build Commands
 
@@ -43,7 +49,7 @@ python ..\dumpUIA\dumpUIA.py -w "iCloud" -j
 
 ## Architecture
 
-**Global Plugin Pattern**: The add-on uses NVDA's globalPluginHandler. The single plugin file at `addon/globalPlugins/iCloudPasswordManager.py` registers for `event_foreground` events to detect iCloud dialogs.
+**Global Plugin Pattern**: The add-on uses NVDA's globalPluginHandler. The plugin at `addon/globalPlugins/iCloudPasswordManager/__init__.py` uses a timer-based polling approach (every 500ms) to detect iCloud dialogs via Windows API.
 
 **iCloud Dialog Detection**:
 - Window class: `#32770` (standard Windows dialog)
