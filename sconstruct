@@ -149,3 +149,32 @@ env.Depends(manifest, "buildVars.py")
 env.Depends(addon, manifest)
 env.Default(addon)
 env.Clean(addon, [".sconsign.dblite", "addon/doc/" + buildVars.baseLanguage + "/"])
+
+# Install target - copies addon to NVDA's addons directory
+nvdaAddonsDir = Path(os.environ.get("APPDATA", "")) / "nvda" / "addons"
+installDir = nvdaAddonsDir / buildVars.addon_info["addon_name"]
+
+
+def installAddon(target, source, env):
+	import shutil
+	import zipfile
+
+	addonPath = str(source[0])
+	destDir = Path(str(target[0]))
+
+	# Remove existing installation if present
+	if destDir.exists():
+		shutil.rmtree(destDir)
+
+	# Extract the addon (it's a zip file)
+	with zipfile.ZipFile(addonPath, "r") as zf:
+		zf.extractall(destDir)
+
+	print(f"Installed to {destDir}")
+	print("Restart NVDA to load the updated addon.")
+	return 0
+
+
+install = env.Command(env.Dir(str(installDir)), addonFile, installAddon)
+env.Alias("install", install)
+env.AlwaysBuild(install)
