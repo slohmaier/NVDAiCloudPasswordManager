@@ -18,6 +18,9 @@ NVDA add-on that makes iCloud Password Manager popups accessible for screen read
 # Build the addon (outputs .nvda-addon file)
 scons
 
+# Build and install to NVDA addons directory
+scons install
+
 # Build development version with timestamp
 scons dev=1
 
@@ -27,10 +30,9 @@ scons pot
 
 ## Debugging Workflow
 
-1. Build the addon: `scons`
-2. Extract/copy the built `iCloudPasswordManager-*.nvda-addon` to the NVDA user addons directory (`%APPDATA%\nvda\addons\`)
-3. Start NVDA with logging: `nvda --log-file=nvda.log`
-4. Wait ~10 seconds for startup, then check log for plugin errors
+1. Build and install: `scons install`
+2. Restart NVDA (or start with logging: `nvda --log-file=nvda.log`)
+3. Check log for plugin errors
 
 ## UIA Structure Analysis
 
@@ -49,7 +51,7 @@ python ..\dumpUIA\dumpUIA.py -w "iCloud" -j
 
 ## Architecture
 
-**Global Plugin Pattern**: The add-on uses NVDA's globalPluginHandler. The plugin at `addon/globalPlugins/iCloudPasswordManager/__init__.py` uses a timer-based polling approach (every 500ms) to detect iCloud dialogs via Windows API.
+**Global Plugin Pattern**: The add-on uses NVDA's globalPluginHandler. The plugin at `addon/globalPlugins/iCloudPasswordManager/__init__.py` uses an event-driven approach via `event_foreground` to detect iCloud dialogs when they appear (no polling).
 
 **iCloud Dialog Detection**:
 - Window class: `#32770` (standard Windows dialog)
