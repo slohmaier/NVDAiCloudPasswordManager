@@ -282,8 +282,10 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 			className = winUser.getClassName(hwnd)
 			if className == ICLOUD_DIALOG_CLASS and event in (EVENT_OBJECT_SHOW, EVENT_SYSTEM_FOREGROUND):
 				core.callLater(100, self._checkWindow, hwnd)
-			elif event == EVENT_OBJECT_FOCUS and className in (
-				"Chrome_WidgetWin_1", "Chrome_RenderWidgetHostHWND"
+			elif (
+				self._pendingCode
+				and event == EVENT_OBJECT_FOCUS
+				and className in ("Chrome_WidgetWin_1", "Chrome_RenderWidgetHostHWND")
 			):
 				core.callLater(50, self._checkFocusedUIA)
 		except Exception:
