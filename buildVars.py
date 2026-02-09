@@ -25,10 +25,10 @@ addon_info = AddonInfo(
 Automatically announces verification codes with clear digit-by-digit speech.
 For password save dialogs, focuses the first button for easy interaction."""),
 	# version
-	addon_version="1.0",
+	addon_version="1.1",
 	# Brief changelog for this version
 	# Translators: what's new content for the add-on version to be shown in the add-on store
-	addon_changelog=_("""Version 1.0: Announces verification codes with spaced digits, includes repeat hint, focuses password save dialog buttons."""),
+	addon_changelog=_("""Version 1.1: Auto-detects verification codes via Windows event hooks and auto-enters them into the Edge extension PIN fields. Focuses password save dialog buttons."""),
 	# Author(s)
 	addon_author="Stefan Lohmaier <stefan@slohmaier.de>",
 	# URL for the add-on documentation support
