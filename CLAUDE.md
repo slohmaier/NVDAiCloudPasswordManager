@@ -6,11 +6,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 NVDA add-on that makes iCloud Password Manager popups accessible for screen reader users.
 
-### Current Features (v1.0)
+### Current Features (v1.1)
 
-1. **Verification Code Announcements**: Automatically detects iCloud verification code dialogs and announces the 6-digit code with spaces for clarity. Includes hint for NVDA+Tab to repeat.
+1. **Verification Code Detection & Auto-Entry**: Automatically detects iCloud verification code dialogs (`#32770` popups) and announces the 6-digit code. When the Edge extension focuses its PIN entry fields, the code is auto-typed.
 
-2. **Password Save Dialog Support**: For dialogs without verification codes, focuses the dialog and first button for easy interaction.
+2. **Password Save Dialog Support**: For dialogs without verification codes, focuses the first button for easy interaction.
 
 ## Build Commands
 
@@ -51,13 +51,19 @@ python ..\dumpUIA\dumpUIA.py -w "iCloud" -j
 
 ## Architecture
 
-**Global Plugin Pattern**: The add-on uses NVDA's globalPluginHandler. The plugin at `addon/globalPlugins/iCloudPasswordManager/__init__.py` uses an event-driven approach via `event_foreground` to detect iCloud dialogs when they appear (no polling).
+**Global Plugin Pattern**: The add-on uses NVDA's globalPluginHandler. The plugin at `addon/globalPlugins/iCloudPasswordManager/__init__.py` uses `SetWinEventHook` (via ctypes) to detect iCloud dialogs. NVDA's built-in events (`event_foreground`, `event_show`, etc.) do NOT fire for iCloud's `#32770` popups, so direct Windows event hooks are required.
 
-**iCloud Dialog Detection**:
-- Window class: `#32770` (standard Windows dialog)
-- Contains child element with "iCloud" in name
-- Verification code format: `XXX XXX` (6 digits with space)
-- Key automation IDs: `1006` (title), `1001` (code)
+**iCloud Dialog Detection** (`#32770` popup from iCloud for Windows):
+- Window class: `#32770` (standard Windows dialog), name is empty
+- Contains child element with "iCloud" in name (AutomationId `1006`)
+- Verification code in child with AutomationId `1001`, format: `XXX XXX`
+- Detected via `EVENT_OBJECT_SHOW` / `EVENT_SYSTEM_FOREGROUND` WinEvents
+
+**Edge Extension PIN Entry** (iCloud Passwords browser extension):
+- Lives inside Edge's `Chrome_WidgetWin_1` window, in an `ExtensionPopup` pane
+- Document named "iCloud Passwords" with `RootWebArea` AutomationId
+- 6 Edit fields: ClassName `PIN`, AutomationId `PIN0`-`PIN5` (no native HWND)
+- Auto-typing triggered by `event_gainFocus` when focus lands on a PIN field
 
 **Build System**: SCons-based with custom tools in `site_scons/`. Configuration lives in `buildVars.py` - edit addon metadata there rather than in manifest templates.
 
