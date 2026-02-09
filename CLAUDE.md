@@ -12,6 +12,8 @@ NVDA add-on that makes iCloud Password Manager popups accessible for screen read
 
 2. **Password Save Dialog Support**: For dialogs without verification codes, focuses the first button for easy interaction.
 
+3. **Credential Autofill List**: When the iCloud Passwords Edge extension shows a dropdown of saved credentials on a login page, NVDA reads the credential items instead of "blank". Uses a speech filter (`filter_speechSequence`) that intercepts "blank" and replaces it with the active credential's text via UIA.
+
 ## Build Commands
 
 ```powershell
@@ -64,6 +66,13 @@ python ..\dumpUIA\dumpUIA.py -w "iCloud" -j
 - Document named "iCloud Passwords" with `RootWebArea` AutomationId
 - 6 Edit fields: ClassName `PIN`, AutomationId `PIN0`-`PIN5` (no native HWND)
 - Auto-typing triggered by `event_gainFocus` when focus lands on a PIN field
+
+**Credential Autofill List** (iCloud Passwords dropdown on login pages):
+- Document "Password AutoFill Completion List" with List `credentialList` inside
+- Items: ClassName `selectable credential`, active item gets `selectable credential active`
+- Chrome's UIA blocks child traversal on `credentialList` (E_POINTER / NULL COM pointer)
+- Solution: Search all ListItem elements from the window element directly, check className for "active"
+- Speech filter intercepts "blank" in `Chrome_RenderWidgetHostHWND` and replaces with credential text
 
 **Build System**: SCons-based with custom tools in `site_scons/`. Configuration lives in `buildVars.py` - edit addon metadata there rather than in manifest templates.
 

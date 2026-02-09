@@ -7,7 +7,24 @@
       "Bash(git -C \"C:\\\\Users\\\\slohma\\\\repos\\\\private\\\\NVDAiCloudPasswordManager\" log --oneline -5)",
       "Bash(git -C \"C:\\\\Users\\\\slohma\\\\repos\\\\private\\\\NVDAiCloudPasswordManager\" config user.email \"stefan@slohmaier.de\")",
       "Bash(git -C \"C:\\\\Users\\\\slohma\\\\repos\\\\private\\\\NVDAiCloudPasswordManager\" add CLAUDE.md .claude/)",
-      "Bash(git -C \"C:\\\\Users\\\\slohma\\\\repos\\\\private\\\\NVDAiCloudPasswordManager\" commit -m \"$\\(cat <<''EOF''\nAdd CLAUDE.md for Claude Code guidance\n\n🤖 Generated with [Claude Code]\\(https://claude.ai/code\\)\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n\\)\")"
+      "Bash(git -C \"C:\\\\Users\\\\slohma\\\\repos\\\\private\\\\NVDAiCloudPasswordManager\" commit -m \"$\\(cat <<''EOF''\nAdd CLAUDE.md for Claude Code guidance\n\n🤖 Generated with [Claude Code]\\(https://claude.ai/code\\)\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(python:*)",
+      "Bash(git clone:*)",
+      "Bash($env:PATH = \"C:\\\\Users\\\\slohma\\\\repos\\\\private\\\\LangDetectSpeech;$env:PATH\")",
+      "Bash(scons install:*)",
+      "Bash(Get-Content \"$env:USERPROFILE\\\\AppData\\\\Roaming\\\\nvda\\\\nvda.log\" -Tail 50)",
+      "Bash(powershell:*)",
+      "Bash(export PATH=\"/c/Users/slohma/repos/private/LangDetectSpeech:$PATH\")",
+      "WebSearch",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:download.nvaccess.org)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "WebFetch(domain:www.webbie.org.uk)",
+      "Bash(git add:*)",
+      "Bash(git commit -m \"$\\(cat <<''EOF''\nUse SetWinEventHook for dialog detection and auto-enter PIN codes\n\nNVDA''s built-in events don''t fire for iCloud''s #32770 popups, so use\ndirect Windows event hooks \\(EVENT_OBJECT_SHOW, EVENT_SYSTEM_FOREGROUND\\)\nvia ctypes. When a verification code is detected, store it and auto-type\ninto the Edge extension''s PIN fields when they receive focus.\n\nCo-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(git config:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)"
     ]
   }
 }
