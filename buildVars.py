@@ -25,10 +25,10 @@ addon_info = AddonInfo(
 Automatically announces verification codes with clear digit-by-digit speech.
 For password save dialogs, focuses the first button for easy interaction."""),
 	# version
-	addon_version="1.2",
+	addon_version="1.2.1",
 	# Brief changelog for this version
 	# Translators: what's new content for the add-on version to be shown in the add-on store
-	addon_changelog=_("""Version 1.2: Reads iCloud credential autofill list items instead of 'blank'. Improved performance with early-exit filtering in speech and event hooks."""),
+	addon_changelog=_("""Version 1.2.1: Fix Enable Password AutoFill popup not being read. Broadened credential list item detection to cover all selectable items."""),
 	# Author(s)
 	addon_author="Stefan Lohmaier <stefan@slohmaier.de>",
 	# URL for the add-on documentation support
