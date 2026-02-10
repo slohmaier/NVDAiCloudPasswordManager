@@ -153,11 +153,10 @@ def _getCredentialListSelectedItem():
 			if not item:
 				continue
 			className = item.currentClassName or ""
-			# Only consider iCloud credential items
+			# Only consider iCloud credential list items (all use "selectable" base class)
 			if (
-				"credential" not in className
+				"selectable" not in className
 				and "iCloudPasswords" not in className
-				and "password-manager" not in className
 			):
 				continue
 			# The active/selected item gets "active" appended to its className
