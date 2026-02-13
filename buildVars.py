@@ -25,10 +25,10 @@ addon_info = AddonInfo(
 Automatically announces verification codes with clear digit-by-digit speech.
 For password save dialogs, focuses the first button for easy interaction."""),
 	# version
-	addon_version="1.2.1",
+	addon_version="1.3",
 	# Brief changelog for this version
 	# Translators: what's new content for the add-on version to be shown in the add-on store
-	addon_changelog=_("""Version 1.2.1: Fix Enable Password AutoFill popup not being read. Broadened credential list item detection to cover all selectable items."""),
+	addon_changelog=_("""Version 1.3: Save password dialog is now fully accessible - dialog steals focus when it appears, Tab/Shift+Tab cycles between buttons with full dialog text announced, and Enter/Space activates buttons."""),
 	# Author(s)
 	addon_author="Stefan Lohmaier <stefan@slohmaier.de>",
 	# URL for the add-on documentation support

@@ -80,6 +80,49 @@ def findFirstButton(obj):
 	return None
 
 
+def _findAllButtons(obj):
+	"""Find all buttons in the dialog."""
+	buttons = []
+	try:
+		for child in obj.recursiveDescendants:
+			if child.role == 9:  # ROLE_BUTTON = 9
+				buttons.append(child)
+	except Exception as e:
+		log.debug(f"iCloudPasswordManager: Error finding buttons: {e}")
+	return buttons
+
+
+def _getDialogText(obj):
+	"""Get the main text content from the dialog (static text elements)."""
+	texts = []
+	try:
+		for child in obj.recursiveDescendants:
+			if child.role == 7:  # ROLE_STATICTEXT = 7
+				name = child.name or ""
+				if name:
+					texts.append(name)
+	except Exception as e:
+		log.debug(f"iCloudPasswordManager: Error getting dialog text: {e}")
+	return " ".join(texts) if texts else None
+
+
+def _forceForegroundWindow(hwnd):
+	"""Reliably bring a window to the foreground using AttachThreadInput trick."""
+	user32 = ctypes.windll.user32
+	kernel32 = ctypes.windll.kernel32
+	foregroundHwnd = user32.GetForegroundWindow()
+	if foregroundHwnd == hwnd:
+		return
+	foreThread = user32.GetWindowThreadProcessId(foregroundHwnd, None)
+	curThread = kernel32.GetCurrentThreadId()
+	if foreThread != curThread:
+		user32.AttachThreadInput(foreThread, curThread, True)
+	user32.SetForegroundWindow(hwnd)
+	user32.BringWindowToTop(hwnd)
+	if foreThread != curThread:
+		user32.AttachThreadInput(foreThread, curThread, False)
+
+
 def isICloudPinField(obj):
 	"""Check if an NVDA object is a PIN input field in the iCloud Passwords extension."""
 	try:
@@ -241,6 +284,7 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 		super().__init__()
 		self._lastHandledHwnd = None
 		self._pendingCode = None
+		self._dialogText = None
 		# Register speech filter for credential list "blank" replacement
 		from speech.extensions import filter_speechSequence
 
@@ -363,11 +407,104 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 			speech.speakMessage(f"iCloud code: {spaced_code}")
 			self._pendingCode = code
 		else:
-			log.info("iCloudPasswordManager: No code found, focusing dialog")
-			button = findFirstButton(obj)
-			if button:
-				api.setFocusObject(button)
-				eventHandler.queueEvent("gainFocus", button)
+			log.info("iCloudPasswordManager: Save password dialog, setting system focus")
+			# Reliably bring the dialog to the foreground
+			hwnd = obj.windowHandle
+			if hwnd:
+				_forceForegroundWindow(hwnd)
+			# Cache dialog text for use during Tab navigation
+			self._dialogText = _getDialogText(obj)
+			# Announce dialog text and available buttons
+			buttons = _findAllButtons(obj)
+			buttonNames = ", ".join(b.name for b in buttons if b.name)
+			announcement = self._dialogText or "iCloud Password dialog"
+			if buttonNames:
+				announcement += f" Buttons: {buttonNames}"
+			speech.speakMessage(announcement)
+			# Move actual system keyboard focus to the first button
+			if buttons:
+				buttons[0].setFocus()
+				api.setFocusObject(buttons[0])
+				eventHandler.queueEvent("gainFocus", buttons[0])
 			else:
+				obj.setFocus()
 				api.setFocusObject(obj)
 				eventHandler.queueEvent("gainFocus", obj)
+
+	def _navigateICloudDialogButton(self, forward=True):
+		"""Navigate between buttons in an iCloud #32770 dialog. Returns True if handled."""
+		try:
+			focusObj = api.getFocusObject()
+			if not focusObj:
+				return False
+			# Quick check: is focus related to the tracked iCloud dialog?
+			dialogHwnd = self._lastHandledHwnd
+			if not dialogHwnd:
+				return False
+			cls = focusObj.windowClassName
+			if cls == "Button":
+				# Walk up parent chain to find the #32770 dialog
+				# (IAccessible has window-level and client-level objects for buttons)
+				dialog = None
+				parent = focusObj.parent
+				for _ in range(5):
+					if not parent:
+						break
+					if parent.windowClassName == ICLOUD_DIALOG_CLASS and parent.windowHandle == dialogHwnd:
+						dialog = parent
+						break
+					parent = parent.parent
+				if not dialog:
+					return False
+			elif cls == ICLOUD_DIALOG_CLASS and focusObj.windowHandle == dialogHwnd:
+				dialog = focusObj
+			else:
+				return False
+			# Find all buttons in the dialog
+			buttons = _findAllButtons(dialog)
+			if len(buttons) <= 1:
+				return False
+			# Find current button index by window handle
+			currentHandle = focusObj.windowHandle
+			currentIndex = -1
+			for i, b in enumerate(buttons):
+				if b.windowHandle == currentHandle:
+					currentIndex = i
+					break
+			if currentIndex == -1:
+				# Focus is on the dialog itself, go to first button
+				nextIndex = 0
+			elif forward:
+				nextIndex = (currentIndex + 1) % len(buttons)
+			else:
+				nextIndex = (currentIndex - 1) % len(buttons)
+			nextButton = buttons[nextIndex]
+			nextButton.setFocus()
+			api.setFocusObject(nextButton)
+			# Announce dialog text + button name ourselves
+			# (don't queue gainFocus - it would cancel our speech and only say the button name)
+			speech.cancelSpeech()
+			buttonName = nextButton.name or ""
+			if self._dialogText:
+				speech.speakMessage(f"{self._dialogText} {buttonName} button")
+			else:
+				speech.speakMessage(f"{buttonName} button")
+			return True
+		except Exception as e:
+			log.debug(f"iCloudPasswordManager: Error navigating dialog: {e}")
+			return False
+
+	def script_tabInICloudDialog(self, gesture):
+		"""Handle Tab in iCloud dialogs to cycle between buttons."""
+		if not self._navigateICloudDialogButton(forward=True):
+			gesture.send()
+
+	def script_shiftTabInICloudDialog(self, gesture):
+		"""Handle Shift+Tab in iCloud dialogs to cycle between buttons."""
+		if not self._navigateICloudDialogButton(forward=False):
+			gesture.send()
+
+	__gestures = {
+		"kb:tab": "tabInICloudDialog",
+		"kb:shift+tab": "shiftTabInICloudDialog",
+	}
