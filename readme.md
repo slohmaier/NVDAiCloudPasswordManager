@@ -4,17 +4,24 @@ An NVDA add-on that makes iCloud Password Manager popups accessible for screen r
 
 ## Features
 
-### Verification Code Announcements
+### Verification Code Detection & Auto-Entry
 When an iCloud verification code dialog appears (e.g., during two-factor authentication), the add-on:
 - Automatically detects the popup
 - Announces the 6-digit code with spaces between digits for clarity (e.g., "iCloud code: 1 2 3 4 5 6")
-- Provides a hint on how to repeat the code (NVDA+Tab)
+- Auto-types the code into the iCloud Passwords Edge extension PIN fields when they receive focus
 
-### Password Save Dialog Support
-For iCloud password save dialogs (without verification codes):
-- Automatically focuses the dialog
-- Moves focus to the first button for easy interaction
-- Announces the button name
+### Password Save Dialog
+When iCloud prompts to save a password:
+- Dialog automatically steals focus from the browser
+- Full dialog text is announced along with available buttons
+- Tab/Shift+Tab cycles between "Save Password" and "Not Now" buttons
+- Each Tab press reads the dialog message and focused button name
+- Enter/Space activates the focused button
+
+### Credential Autofill List
+When the iCloud Passwords Edge extension shows a dropdown of saved credentials on a login page:
+- NVDA reads the credential items instead of "blank"
+- Arrow keys navigate between credentials with proper announcements
 
 ## Requirements
 
@@ -23,7 +30,7 @@ For iCloud password save dialogs (without verification codes):
 
 ## Installation
 
-1. Download the latest `.nvda-addon` file from the releases
+1. Download the latest `.nvda-addon` file from the [releases](https://github.com/slohmaier/NVDAiCloudPasswordManager/releases)
 2. Open the file with NVDA running to install
 3. Restart NVDA when prompted
 
@@ -31,9 +38,11 @@ For iCloud password save dialogs (without verification codes):
 
 The add-on works automatically in the background. When you:
 
-1. **Receive a verification code**: The code will be announced automatically. Use NVDA+Tab to hear the current focus again if needed.
+1. **Receive a verification code**: The code will be announced automatically and auto-typed into PIN fields.
 
-2. **See a password save prompt**: The dialog will be focused and the first button announced.
+2. **See a password save prompt**: The dialog will steal focus. Use Tab/Shift+Tab to navigate between buttons, Enter/Space to activate.
+
+3. **See a credential autofill dropdown**: Use arrow keys to navigate. NVDA will read the credential names instead of "blank".
 
 ## Building from Source
 
