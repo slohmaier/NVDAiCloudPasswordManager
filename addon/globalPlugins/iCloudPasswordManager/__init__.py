@@ -7,6 +7,7 @@ import re
 from ctypes import wintypes
 
 import api
+import controlTypes
 import core
 import eventHandler
 import globalPluginHandler
@@ -73,7 +74,7 @@ def findFirstButton(obj):
 	"""Find the first button in the dialog."""
 	try:
 		for child in obj.recursiveDescendants:
-			if child.role == 9:  # ROLE_BUTTON = 9
+			if child.role == controlTypes.Role.BUTTON:
 				return child
 	except Exception as e:
 		log.debug(f"iCloudPasswordManager: Error searching for button: {e}")
@@ -85,7 +86,7 @@ def _findAllButtons(obj):
 	buttons = []
 	try:
 		for child in obj.recursiveDescendants:
-			if child.role == 9:  # ROLE_BUTTON = 9
+			if child.role == controlTypes.Role.BUTTON:
 				buttons.append(child)
 	except Exception as e:
 		log.debug(f"iCloudPasswordManager: Error finding buttons: {e}")
@@ -97,7 +98,7 @@ def _getDialogText(obj):
 	texts = []
 	try:
 		for child in obj.recursiveDescendants:
-			if child.role == 7:  # ROLE_STATICTEXT = 7
+			if child.role == controlTypes.Role.STATICTEXT:
 				name = child.name or ""
 				if name:
 					texts.append(name)
@@ -135,7 +136,7 @@ def isICloudPinField(obj):
 		if uiaClassName == "PIN":
 			return True
 		# Fallback: walk parents looking for "iCloud Passwords" document
-		if obj.role == 8:  # ROLE_EDITABLETEXT
+		if obj.role == controlTypes.Role.EDITABLETEXT:
 			parent = obj.parent
 			for _ in range(5):
 				if parent is None:
