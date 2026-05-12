@@ -23,6 +23,12 @@ When the iCloud Passwords Edge extension shows a dropdown of saved credentials o
 - NVDA reads the credential items instead of "blank"
 - Arrow keys navigate between credentials with proper announcements
 
+### Main Window Accessibility
+In the iCloud Passwords desktop application:
+- The previously unlabeled Add (+) and Sort toolbar buttons now announce proper names
+- Saved credential list items read their title and username (e.g., "gitea slohmaier, slohmaier") instead of just "List Item"
+- The unlabeled chevron button next to the shared-group label on a credential's detail view is now announced as "Change group"
+
 ## Requirements
 
 - NVDA 2024.1 or later

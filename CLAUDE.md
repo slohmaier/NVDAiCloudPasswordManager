@@ -6,13 +6,15 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 NVDA add-on that makes iCloud Password Manager popups accessible for screen reader users.
 
-### Current Features (v1.1)
+### Current Features (v1.4)
 
 1. **Verification Code Detection & Auto-Entry**: Automatically detects iCloud verification code dialogs (`#32770` popups) and announces the 6-digit code. When the Edge extension focuses its PIN entry fields, the code is auto-typed.
 
-2. **Password Save Dialog Support**: For dialogs without verification codes, focuses the first button for easy interaction.
+2. **Password Save Dialog Support**: For dialogs without verification codes, focuses the first button for easy interaction. Tab/Shift+Tab cycle between buttons with the dialog text re-announced.
 
 3. **Credential Autofill List**: When the iCloud Passwords Edge extension shows a dropdown of saved credentials on a login page, NVDA reads the credential items instead of "blank". Uses a speech filter (`filter_speechSequence`) that intercepts "blank" and replaces it with the active credential's text via UIA.
+
+4. **Main Window Accessibility (AppModule)**: For the iCloud Passwords desktop app (`iCloudPasswords.exe`, WinUI3), labels the unlabeled toolbar buttons (Add `m_AddButton`, Sort `m_SortButton`) and the chevron button next to `m_InternetCredentialSharedGroup` ("Change group"). Combines child TextBlocks of saved credential `ListViewItem`s in `InternetCredentialsListView` so NVDA reads "title, username" instead of bare "List Item". Implemented as `addon/appModules/icloudpasswords.py` (lowercase filename is required — NVDA lowercases the executable name before importing the appModule).
 
 ## Build Commands
 

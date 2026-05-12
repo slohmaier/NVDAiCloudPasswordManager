@@ -25,10 +25,10 @@ addon_info = AddonInfo(
 Automatically announces verification codes with clear digit-by-digit speech.
 For password save dialogs, focuses the first button for easy interaction."""),
 	# version
-	addon_version="1.3",
+	addon_version="1.4",
 	# Brief changelog for this version
 	# Translators: what's new content for the add-on version to be shown in the add-on store
-	addon_changelog=_("""Version 1.3: Save password dialog is now fully accessible - dialog steals focus when it appears, Tab/Shift+Tab cycles between buttons with full dialog text announced, and Enter/Space activates buttons."""),
+	addon_changelog=_("""Version 1.4: The iCloud Passwords main window is now accessible. Previously unlabeled buttons (Add password, Sort, Change group) now announce proper names, and saved credential list items read their title and username instead of just 'List Item'."""),
 	# Author(s)
 	addon_author="Stefan Lohmaier <stefan@slohmaier.de>",
 	# URL for the add-on documentation support
