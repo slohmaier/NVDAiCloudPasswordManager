@@ -156,6 +156,57 @@ def sendDigits(code):
 		core.callLater(50 * i, _sendKey, digit)
 
 
+def _findAndFocusEdgePinField():
+	"""Search visible Chrome_WidgetWin_1 windows for the iCloud PIN0 field and SetFocus via UIA.
+
+	Returns True if PIN0 was located and SetFocus was invoked, False otherwise.
+	Used as a fallback when Edge fails to auto-focus the first PIN field after the
+	extension popup appears — without focus, event_gainFocus never fires and the
+	pending verification code is never typed.
+	"""
+	try:
+		import UIAHandler
+
+		uia = UIAHandler.handler
+		if not uia or not uia.clientObject:
+			return False
+
+		EnumWindowsProc = ctypes.WINFUNCTYPE(ctypes.c_bool, wintypes.HWND, wintypes.LPARAM)
+		hwnds = []
+
+		def _cb(hwnd, _lparam):
+			try:
+				if ctypes.windll.user32.IsWindowVisible(hwnd):
+					cls = winUser.getClassName(hwnd)
+					if cls == "Chrome_WidgetWin_1":
+						hwnds.append(hwnd)
+			except Exception:
+				pass
+			return True
+
+		ctypes.windll.user32.EnumWindows(EnumWindowsProc(_cb), 0)
+
+		# UIA_AutomationIdPropertyId = 30011, TreeScope_Descendants = 4
+		pin0Condition = uia.clientObject.CreatePropertyCondition(30011, "PIN0")
+		for hwnd in hwnds:
+			try:
+				windowElement = uia.clientObject.elementFromHandle(hwnd)
+				if not windowElement:
+					continue
+				pin0 = windowElement.FindFirst(4, pin0Condition)
+				if pin0:
+					log.info(f"iCloudPasswordManager: Found PIN0 in hwnd={hwnd}, calling SetFocus")
+					pin0.SetFocus()
+					return True
+			except Exception as e:
+				log.debug(f"iCloudPasswordManager: PIN0 search failed in hwnd={hwnd}: {e}")
+				continue
+		return False
+	except Exception as e:
+		log.debug(f"iCloudPasswordManager: Error in _findAndFocusEdgePinField: {e}")
+		return False
+
+
 def _sendKey(digit):
 	"""Send a single digit keystroke."""
 	try:
@@ -399,6 +450,26 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 			log.debug(f"iCloudPasswordManager: Error in event_gainFocus: {e}")
 		nextHandler()
 
+	def _tryFocusPinField(self, attempt=0):
+		"""Poll for the Edge PIN0 field and SetFocus when Edge fails to auto-focus it.
+
+		Stops as soon as _pendingCode is cleared (typing started via the normal focus
+		event path) or after ~3 seconds of attempts.
+		"""
+		if not self._pendingCode:
+			return
+		if attempt >= 10:
+			log.info("iCloudPasswordManager: PIN0 not found after 10 attempts, giving up auto-focus")
+			return
+		try:
+			if _findAndFocusEdgePinField():
+				# SetFocus will trigger the focus event path, which types the code
+				# and clears _pendingCode. No further polling needed.
+				return
+		except Exception as e:
+			log.debug(f"iCloudPasswordManager: PIN0 focus attempt {attempt} failed: {e}")
+		core.callLater(300, self._tryFocusPinField, attempt + 1)
+
 	def _handleICloudDialog(self, obj):
 		"""Handle an iCloud dialog - announce code or focus button."""
 		code = findVerificationCode(obj)
@@ -407,6 +478,9 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 			log.info(f"iCloudPasswordManager: Announcing code: {code}")
 			speech.speakMessage(f"iCloud code: {spaced_code}")
 			self._pendingCode = code
+			# Edge sometimes shows the extension popup without auto-focusing PIN0.
+			# Give Edge a brief moment to focus PIN0 itself; if it doesn't, we will.
+			core.callLater(500, self._tryFocusPinField)
 		else:
 			log.info("iCloudPasswordManager: Save password dialog, setting system focus")
 			# Reliably bring the dialog to the foreground
